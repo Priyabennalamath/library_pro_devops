@@ -1,0 +1,44 @@
+services:
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - '8082:8082'
+    env_file:
+      - ./server/.env    # make sure this file exists!
+    volumes:
+      - ./server:/app    # Mount source code for live edits
+      - /app/node_modules   # Prevent overriding node_modules from host
+    depends_on:
+      - mongo
+    restart: always
+    environment:
+      - NODE_ENV=development
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - NODE_ENV=development
+    depends_on:
+      - backend
+    restart: always
+
+  mongo:
+    image: mongo:6.0
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo-data:/data/db
+    restart: always
+
+volumes:
+  mongo-data:
