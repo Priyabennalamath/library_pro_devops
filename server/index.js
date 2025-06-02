@@ -23,48 +23,41 @@ const userRouter = require('./routes/userRouter');
 const app = express();
 const PORT = process.env.PORT || 8082;
 
-// Function to create and save a default librarian user
 async function createDefaultLibrarian() {
     try {
-        // Check if a user with this email already exists
-        const existingUser = await User.findOne({ email: 'krishnapatil@gmail.com' });
+        const existingUser = await User.findOne({ email: 'librarian@gmail.com' });
 
         if (existingUser) {
             console.log('Default librarian user already exists. Skipping creation.');
-            return; // Exit if user already exists
+            return;
         }
 
         const user = new User({
-            name: 'Krishna Patil',
-            email: 'krishnapatil@gmail.com',
+            name: 'Librarian',
+            email: 'librarian@gmail.com',
             dob: new Date('1990-01-01'),
             phone: '1234567890',
             isAdmin: true,
             photoUrl: 'https://example.com/photo.jpg',
         });
 
-        // Set password (hash + salt)
-        user.setPassword('krishna17');
+        user.setPassword('Librarian@17');
 
-        // Save to database
         await user.save();
         console.log('Default librarian user created successfully!');
     } catch (error) {
         console.error('Error creating default librarian user:', error);
     }
-    // IMPORTANT: Do NOT close the mongoose connection here, as the main app needs it open.
 }
 
-// DB connection
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 })
-    .then(async () => { // Use async here to await createDefaultLibrarian
+    .then(async () => {
         console.log('Connected to DB on MongoDB Atlas');
         console.log('Database Name:', mongoose.connection.name);
 
-        // Insert a test document to create DB/collection if not present
         const testSchema = new mongoose.Schema({
             name: String,
             createdAt: { type: Date, default: Date.now },
@@ -83,12 +76,10 @@ mongoose.connect(process.env.MONGO_URI, {
             })
             .catch(err => console.error('Test document error:', err));
 
-        // Call the function to create the default librarian user after DB connection
         await createDefaultLibrarian();
     })
     .catch(err => console.error('DB connection error', err));
 
-// Middleware setup
 app.use(logger('dev'));
 app.use(express.urlencoded({ extended: false }));
 app.use(cors({
